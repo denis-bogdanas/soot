@@ -22,6 +22,8 @@ package ca.mcgill.sable.soot.launching;
 
 import java.io.PrintStream;
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -97,7 +99,7 @@ public class SootThread extends Thread {
 		            IProject project = SootPlugin.getWorkspace().getRoot().getProject(mainProject);
 		            if(project.exists() && project.isOpen() && project.hasNature("org.eclipse.jdt.core.javanature")) {
 		            	IJavaProject javaProject = JavaCore.create(project);
-						URL[] urls = SootClasspath.projectClassPath(javaProject);
+						URL[] urls = toURLs(SootClasspath.projectClassPath(javaProject));
 						loader = new URLClassLoader(urls,SootThread.class.getClassLoader());
 		            } else {
 		    			final String mc = mainClass;
@@ -139,7 +141,8 @@ public class SootThread extends Thread {
 					}
 				}
 			}
-			setCfgList(soot.Scene.v().getPkgList());
+			//Cast is a hack to make compilation happy with latest Soot. Option seems unused anyway.
+			setCfgList((ArrayList) soot.Scene.v().getPkgList());
 			getParent().setCfgList(getCfgList());
 			
 		}
@@ -148,6 +151,15 @@ public class SootThread extends Thread {
 			e.printStackTrace(sootOutFinal);
 			System.out.println(e.getCause());
        	}
+	}
+
+	public static URL[] toURLs(URI[] uris) throws MalformedURLException {
+		URL[] urls = new URL[uris.length];
+		for(int i = 0; i<uris.length; i++) {
+			urls[i] = uris[i].toURL();
+		}
+
+		return urls;
 	}
 
 	private Shell getShell() {

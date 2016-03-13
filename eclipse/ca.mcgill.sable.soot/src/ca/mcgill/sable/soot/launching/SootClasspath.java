@@ -20,10 +20,8 @@
 package ca.mcgill.sable.soot.launching;
 
 import java.io.File;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,50 +39,47 @@ import ca.mcgill.sable.soot.SootPlugin;
 public class SootClasspath {
 
 	private String separator = File.pathSeparator;
-	protected URL[] urls = new URL[0];
+	protected URI[] urls = new URI[0];
 	
 	public void initialize(IJavaProject javaProject) {
 		this.urls = projectClassPath(javaProject);		
 	}
 
-	public static URL[] projectClassPath(IJavaProject javaProject) {
+	public static URI[] projectClassPath(IJavaProject javaProject) {
 		IWorkspace workspace = SootPlugin.getWorkspace();
 		IClasspathEntry[] cp;
 		try {
 			cp = javaProject.getResolvedClasspath(true);
-			List<URL> urls = new ArrayList<URL>();
+			List<URI> uris = new ArrayList<URI>();
 			String uriString = workspace.getRoot().getFile(
 					javaProject.getOutputLocation()).getLocationURI().toString()
 					+ "/";
-			urls.add(new URI(uriString).toURL());
+			uris.add(new URI(uriString));
 			for (IClasspathEntry entry : cp) {
 				File file = entry.getPath().toFile();
-				URL url = file.toURI().toURL();
-				urls.add(url);
+				URI uri = file.toURI();
+				uris.add(uri);
 			}
-			URL[] array = new URL[urls.size()];
-			urls.toArray(array);
+			URI[] array = new URI[uris.size()];
+			uris.toArray(array);
 			return array;
 		} catch (JavaModelException e) {
 			e.printStackTrace();
-			return new URL[0];
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-			return new URL[0];
+			return new URI[0];
 		} catch (URISyntaxException e) {
 			e.printStackTrace();
-			return new URL[0];
+			return new URI[0];
 		}
 	}
 	
 	public String getSootClasspath() {
-		return urlsToString(urls);
+		return urisToString(urls);
 	}
 
-	public static String urlsToString(URL[] urls) {
+	public static String urisToString(URI[] uris) {
 		StringBuffer cp = new StringBuffer();
-		for (URL url : urls) {
-			cp.append(url.getPath());
+		for (URI uri : uris) {
+			cp.append(uri.getPath());
 			cp.append(File.pathSeparator);
 		}
 		
