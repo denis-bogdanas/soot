@@ -1327,7 +1327,9 @@ public class GeomPointsTo extends PAG
 			solveConstraints();
 			
 			// We update the call graph and other internal data when the new points-to information is ready
-			n_obs = updateCallGraph();
+            // We update the call graph and other internal data when the new points-to information is ready
+            //todo add a soot parameter to disble call graph updates
+            //n_obs = updateCallGraph();
 			finalizeInternalData();
 		}
 
